@@ -1,0 +1,16 @@
+{
+  "name": "qwen-review",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Offline codebase maps, project trees, Git diffs and local Qwen reviews",
+  "scripts": {
+    "start": "bash run-workspace.sh",
+    "test": "python3 -m unittest discover -q && node --test tests/diff.test.cjs"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "typescript": "6.0.3"
+  }
+}

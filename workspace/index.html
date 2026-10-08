@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Qwen Review · Local codebase intelligence</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23232323'/%3E%3Cpath d='M8 9h7v7h9v8' fill='none' stroke='%23e9986b' stroke-width='3'/%3E%3Ccircle cx='8' cy='9' r='3' fill='%23e9986b'/%3E%3Ccircle cx='24' cy='24' r='3' fill='%23e9986b'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="/style.css">
+  <script src="/diff.js" defer></script>
+  <script src="/app.js" defer></script>
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="/" aria-label="Qwen Review home"><span class="brand-mark">⌘</span> Qwen <span>Review</span></a>
+    <div class="local-pill"><i></i> On your machine</div>
+    <span class="top-note">CODEBASE INTELLIGENCE</span>
+    <span id="model-status" class="model-status">Qwen3.5 · 2B</span>
+  </header>
+  <form id="project-form" class="project-bar">
+    <label for="project-root">PROJECT</label>
+    <span class="folder-icon" aria-hidden="true">▱</span>
+    <input id="project-root" autocomplete="off" spellcheck="false" aria-label="Absolute project folder" placeholder="/home/nami/Desktop/projects/your-project" required>
+    <button id="open-project" class="primary" type="submit">Open project <span>↗</span></button>
+    <button id="refresh" type="button" title="Rescan the working tree" aria-label="Rescan project">↻</button>
+  </form>
+  <div id="notice" class="notice" role="status" hidden></div>
+  <main class="workspace">
+    <aside class="explorer">
+      <div class="section-title"><span>EXPLORER</span><span id="file-count">—</span></div>
+      <div class="file-search"><span>⌕</span><input id="file-search" aria-label="Find a source file" placeholder="Find a file…" autocomplete="off"></div>
+      <div id="file-tree" class="file-tree" aria-label="Project files"></div>
+      <div class="explorer-footer"><i></i> Working-tree snapshot<br><span id="scan-time">Open a project to begin</span></div>
+    </aside>
+    <section class="review-surface" aria-label="Codebase map and source">
+      <nav class="view-tabs" aria-label="Workspace views">
+        <button class="active" data-view="map">⌘ <span>Dependency map</span></button>
+        <button data-view="archify">◇ <span>Archify</span></button>
+        <button data-view="changes">± <span>Changes</span></button>
+        <div class="view-stats"><span id="edge-count">—</span> connections</div>
+      </nav>
+      <section id="map-view" class="map-view">
+        <div class="canvas-heading"><div><span class="eyebrow">FOLLOW THE CODE</span><h1 id="map-title">Your code, connected.</h1></div><button id="fit" class="subtle" title="Fit map to viewport">Fit view ⤢</button></div>
+        <div class="map-legend"><span><i class="incoming-dot"></i> Imported by</span><span><i class="selected-dot"></i> Selected file</span><span><i class="outgoing-dot"></i> Imports</span></div>
+        <svg id="graph" role="img" aria-label="Interactive file dependency map" tabindex="0"><defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#6c7473"/></marker></defs><g id="graph-edges"></g><g id="graph-nodes"></g></svg>
+        <div id="canvas-empty" class="canvas-empty"><span class="empty-symbol">⌘</span><h2>Start with a real project.</h2><p>Open a folder, select a file, and follow its connections.</p></div>
+        <div class="canvas-footer"><span id="map-scope">Arrows follow parsed imports. The model explains the evidence.</span><div><button id="zoom-out" aria-label="Zoom out">−</button><button id="zoom-in" aria-label="Zoom in">+</button></div></div>
+      </section>
+      <section id="archify-view" class="archify-view" hidden>
+        <div class="archify-toolbar"><div class="archify-scope-label"><span id="diagram-scope-label">Diagram</span><div class="scope-picker"><select id="archify-scope" hidden aria-hidden="true" tabindex="-1"><option value="file">Selected file</option><option value="project">Whole project</option></select><button id="scope-toggle" type="button" aria-haspopup="listbox" aria-expanded="false" aria-controls="scope-options" aria-labelledby="diagram-scope-label scope-value"><span id="scope-value">Selected file</span><span aria-hidden="true">⌄</span></button><div id="scope-options" role="listbox" aria-labelledby="diagram-scope-label" hidden><button type="button" role="option" aria-selected="true" data-scope="file" tabindex="-1">Selected file<span aria-hidden="true">✓</span></button><button type="button" role="option" aria-selected="false" data-scope="project" tabindex="-1">Whole project<span aria-hidden="true">✓</span></button></div></div></div><button id="generate-diagram" class="primary">Generate with Archify ↗</button><a id="download-diagram" class="subtle" hidden download="import-map.html">Download HTML ↓</a></div>
+        <div id="archify-empty" class="view-empty"><span>◇</span><h2>A diagram you can explore.</h2><p>Select a source file, then generate its Archify diagram.</p></div>
+        <iframe id="diagram-frame" title="Project diagram" allow="fullscreen" allowfullscreen sandbox="allow-scripts allow-downloads" hidden></iframe>
+      </section>
+      <section id="changes-view" class="changes-view" hidden>
+        <div class="changes-heading"><div><span class="eyebrow">BEFORE YOU SHIP</span><h1>Review your changes.</h1></div><div class="diff-actions"><label for="diff-layout">Layout <select id="diff-layout"><option value="auto">Auto</option><option value="split">Side by side</option><option value="unified">Stacked</option></select></label><button id="load-diff" class="subtle">Refresh ↻</button><button id="review-changes" class="primary">Ask Qwen to review ↗</button></div></div>
+        <div class="diff-scope">Staged + working-tree source changes against HEAD. Auto splits files with more than 20 changed lines when space allows.</div>
+        <div class="changes-scroll">
+          <details class="diff-status"><summary>Working-tree status · includes untracked files</summary><pre id="git-status" class="git-status"></pre></details>
+          <div id="diff-summary" role="status"></div>
+          <div id="diff-content">Open the Changes view to load the current Git diff.</div>
+        </div>
+      </section>
+      <section class="file-detail" aria-label="Selected file details">
+        <div class="detail-heading"><span class="code-icon">&lt;/&gt;</span><strong id="selected-path">No file selected</strong><button id="explain-file" class="subtle">Explain file ↗</button></div>
+        <nav class="detail-tabs" aria-label="File details"><button class="active" data-detail="connections">Connections <span id="connection-count">0</span></button><button data-detail="source">Source</button><button data-detail="impact">Potential impact <span id="impact-count">0</span></button></nav>
+        <div id="connections-panel" class="detail-panel"><p class="detail-empty">Select a file on the map or in the explorer.</p></div>
+        <div id="source-panel" class="detail-panel source-panel" hidden><pre id="source-content"></pre><div class="source-pages"><button id="source-prev" class="subtle">← Previous lines</button><span id="source-range"></span><button id="source-next" class="subtle">Next lines →</button></div></div>
+        <div id="impact-panel" class="detail-panel" hidden></div>
+      </section>
+    </section>
+    <aside class="chat-panel" aria-label="Qwen code review chat">
+      <div class="chat-heading"><div><i></i><strong>Qwen</strong><span>Local reviewer</span></div><button id="new-chat" class="subtle" title="Start a new conversation" aria-label="New conversation">＋</button></div>
+      <div id="messages" class="messages" aria-live="polite">
+        <div id="chat-intro" class="chat-intro"><span class="assistant-mark">✳</span><h2>Ask the codebase.</h2><p>Trace a connection. Understand a module. Review what changed.</p><div class="suggestions"><button data-prompt="connections">What connects to this file? <span>↗</span></button><button data-prompt="impact">What could this change affect? <span>↗</span></button><button data-prompt="review">Review my current changes <span>↗</span></button></div><span class="intro-note">Grounded in source files and parsed imports.</span></div>
+      </div>
+      <form id="chat-form" class="composer"><div id="chat-context" class="chat-context">▱ No project selected</div><textarea id="prompt" rows="3" placeholder="Ask about your code…" aria-label="Question for Qwen" required></textarea><div class="composer-bottom"><span><i></i> Qwen3.5 · local</span><button id="stop" type="button" hidden aria-label="Stop review">■</button><button id="send" class="send" type="submit" aria-label="Send question">↑</button></div></form>
+      <div class="chat-footnote">Verify review findings against the linked source.</div>
+    </aside>
+  </main>
+</body>
+</html>

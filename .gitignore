@@ -1,0 +1,17 @@
+node_modules/
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.env
+.env.*
+!.env.example
+models/
+runtime/
+backups/
+downloads/
+*.gguf
+*.sqlite*
+*.log
+obsidian.json
+.DS_Store
