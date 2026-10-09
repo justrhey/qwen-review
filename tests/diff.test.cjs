@@ -24,3 +24,23 @@ test('binary and rename metadata survive without fabricated source rows', () => 
   const [file] = parse('diff --git a/a b/b\nsimilarity index 100%\nrename from a\nrename to b\nBinary files a/a and b/b differ\n');
   assert.equal(file.path,'b'); assert.equal(file.hunks.length,0); assert.equal(file.metadata.length,4);
 });
+
+test('live source preview preserves untouched lines and applies multiple hunks', () => {
+  const {preview} = require('../workspace/diff.js');
+  assert.equal(preview('before\nold\nbetween\nremove\nafter\n', '@@ -2 +2 @@\n-old\n+new\n@@ -4 +4,2 @@\n-remove\n+first\n+second\n'), 'before\nnew\nbetween\nfirst\nsecond\nafter\n');
+  assert.equal(preview('one\ntwo\n', '@@ -1,0 +2 @@\n+inserted\n'), 'one\ninserted\ntwo\n');
+});
+test('live source preview handles added files, deletions and no newline', () => {
+  const {preview} = require('../workspace/diff.js');
+  assert.equal(preview('', '+const value = 1;\n+export default value;\n'), 'const value = 1;\nexport default value;\n');
+  assert.equal(preview('', '@@ -0,0 +1,2 @@\n+one\n+two\n'), 'one\ntwo\n');
+  assert.equal(preview('old\n', '@@ -1 +1 @@\n-old\n+new\n\\ No newline at end of file\n'), 'new');
+  assert.equal(preview('old\n', '@@ -1 +0,0 @@\n-old\n'), '');
+});
+test('live source preview rejects stale sources and incomplete patches', () => {
+  const {preview} = require('../workspace/diff.js');
+  assert.equal(preview('already changed\n', '@@ -1 +1 @@\n-old\n+new\n'), null);
+  assert.equal(preview('old\n', '@@ -1 +1,2 @@\n-old\n+partial\n'), null);
+  assert.equal(preview('old\n', '@@ -99 +99 @@\n-old\n+new\n'), null);
+  assert.equal(preview('old\n', '+new\n'), null);
+});

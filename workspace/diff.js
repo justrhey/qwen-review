@@ -60,7 +60,38 @@
     }
     return result;
   }
-  const api = { parse, align };
+  function preview(source, patch) {
+    if (typeof source !== 'string') return null;
+    if (!patch.includes('@@ ')) {
+      const lines = patch.split('\n');
+      if (lines.at(-1) === '') lines.pop();
+      return source === '' && lines.length && lines.every(line => line.startsWith('+')) ? lines.map(line => line.slice(1)).join('\n') + '\n' : null;
+    }
+    const files = parse(patch.startsWith('diff --git ') ? patch : 'diff --git a/preview b/preview\n' + patch);
+    if (files.length !== 1 || !files[0].hunks.length) return null;
+    const original = source.replace(/\r\n/g, '\n').split('\n');
+    if (original.at(-1) === '') original.pop();
+    let result = [];
+    let cursor = 0, newline = source.endsWith('\n') || source === '';
+    for (const hunk of files[0].hunks) {
+      const match = hunk.heading.match(/^@@ -(\d+)(?:,(\d+))? \+(\d+)(?:,(\d+))? @@/);
+      const count = Number(match[2] ?? 1);
+      const start = Math.max(0, Number(match[1]) - (count ? 1 : 0));
+      if (start < cursor || start > original.length || hunk.rows.filter(row => row.type !== '+').length !== count || hunk.rows.filter(row => row.type !== '-').length !== Number(match[4] ?? 1)) return null;
+      result = result.concat(original.slice(cursor, start)); cursor = start;
+      for (const row of hunk.rows) {
+        if (row.type !== '+') {
+          if (original[cursor] !== row.text) return null;
+          cursor++;
+        }
+        if (row.type !== '-') result.push(row.text);
+        if (cursor === original.length && row.type !== '-') newline = !row.noNewline;
+      }
+    }
+    result = result.concat(original.slice(cursor));
+    return result.join('\n') + (result.length && newline ? '\n' : '');
+  }
+  const api = { parse, align, preview };
   if (typeof module !== 'undefined') module.exports = api;
   scope.QwenDiff = api;
 })(globalThis);

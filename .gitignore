@@ -15,3 +15,8 @@ downloads/
 *.log
 obsidian.json
 .DS_Store
+
+# Local workspace and training data
+training/
+turn-input.json
+added.js

@@ -1,0 +1,26 @@
+{
+  "installed_on": "2026-09-10",
+  "runtime": {
+    "project": "https://github.com/ggml-org/llama.cpp",
+    "stable_release": "v0.4.0",
+    "build": "b10809",
+    "url": "https://github.com/ggml-org/llama.cpp/releases/download/b10809/llama-b10809-bin-ubuntu-x64.tar.gz",
+    "sha256": "5e34434ddc6d03cd1584f403201aff0d4bd1a5793a72ff7e286532dfd1e4b941"
+  },
+  "model": {
+    "upstream": "https://huggingface.co/Qwen/Qwen3.5-2B",
+    "quantization_provider": "bartowski",
+    "repository": "bartowski/Qwen_Qwen3.5-2B-GGUF",
+    "revision": "7d26695454df6de5fbcce2e58681e62dae06ce43",
+    "file": "Qwen_Qwen3.5-2B-Q4_K_M.gguf",
+    "size_bytes": 1396198496,
+    "sha256": "57a1085840f497d764a7fc5d346922dbde961efb54cc792ea81d694fd846a1d8",
+    "url": "https://huggingface.co/bartowski/Qwen_Qwen3.5-2B-GGUF/resolve/7d26695454df6de5fbcce2e58681e62dae06ce43/Qwen_Qwen3.5-2B-Q4_K_M.gguf"
+  },
+  "vulkan_runtime": {
+    "project": "https://github.com/ggml-org/llama.cpp",
+    "build": "b10809",
+    "url": "https://github.com/ggml-org/llama.cpp/releases/download/b10809/llama-b10809-bin-ubuntu-vulkan-x64.tar.gz",
+    "sha256": "07f029cef440c82c3cff5310641eb6347e5cbcd865a5d88990215058aa049e93"
+  }
+}

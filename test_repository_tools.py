@@ -176,9 +176,10 @@ class RepositoryTests(unittest.TestCase):
 
     def test_review_agent_enforces_tool_and_root_scope(self):
         call = lambda name, args: {'id': 'test', 'function': {'name': name, 'arguments': json.dumps(args)}}
-        with patch.object(agent, 'REVIEW_ROOT', self.root), contextlib.redirect_stdout(io.StringIO()):
+        with patch.object(agent, 'REVIEW_ROOT', self.root), contextlib.redirect_stdout(io.StringIO()), patch.object(agent, 'approve') as approval:
             result = agent.execute(call('run_command', {'cwd': str(self.root), 'command': 'touch nope'}))
             self.assertIn('only repository-reading', result)
+            approval.assert_not_called()
             result = agent.execute(call('read_project_file', {'root': '/tmp', 'path': 'file.ts'}))
             self.assertIn('only inspect the selected project', result)
             result = agent.execute(call('read_project_file', {'root': str(self.root), 'path': 'src/value.ts'}))
@@ -193,7 +194,7 @@ class RepositoryTests(unittest.TestCase):
         self.assertIn('1: export const value', result)
 
     def test_round_limit_keeps_system_prompt_at_beginning(self):
-        request = json.dumps({'review_root': str(self.root), 'messages': [{'role': 'user', 'content': 'test'}]}) + '\n'
+        request = json.dumps({'messages': [{'role': 'user', 'content': 'test'}]}) + '\n'
         def reply(messages, tools):
             self.assertEqual([m['role'] for m in messages], ['system', 'user'])
             self.assertIn('Tool round limit reached', messages[0]['content'])
@@ -203,7 +204,7 @@ class RepositoryTests(unittest.TestCase):
             self.assertEqual(agent.main(), 0)
 
     def test_runtime_adds_links_from_verified_tool_evidence(self):
-        request = json.dumps({'review_root': str(self.root), 'messages': [{'role': 'user', 'content': 'Which file imports App?'}]}) + '\n'
+        request = json.dumps({'messages': [{'role': 'user', 'content': 'Which file imports App?'}]}) + '\n'
         call = {'id': 'trace', 'function': {'name': 'trace_connections', 'arguments': json.dumps({'root': str(self.root), 'path': 'src/App.tsx'})}}
         responses = [{'role': 'assistant', 'content': '', 'tool_calls': [call]}, {'role': 'assistant', 'content': 'src/main.tsx imports it.'}]
         with patch.object(agent.sys, 'stdin', io.StringIO(request)), patch.object(agent, 'completion', side_effect=responses), contextlib.redirect_stdout(io.StringIO()) as out:

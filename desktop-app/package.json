@@ -1,0 +1,13 @@
+{
+  "name": "arko-workspace-desktop",
+  "version": "1.0.0",
+  "private": true,
+  "main": "main.cjs",
+  "scripts": {
+    "start": "electron ."
+  },
+  "description": "Arko Workspace desktop application",
+  "dependencies": {
+    "electron": "44.7.0"
+  }
+}

@@ -9,7 +9,7 @@ import tempfile
 import time
 
 BASE = Path(__file__).resolve().parent
-ARCHIFY = Path(os.environ.get("ARCHIFY_CLI", str(Path.home() / "archify/archify/bin/archify.mjs"))).expanduser()
+ARCHIFY = Path.home() / "archify/archify/bin/archify.mjs"
 ARTIFACTS = Path.home() / ".local/state/local-qwen/diagrams"
 MAX_FILE = 1024 * 1024
 MAX_FILES = 1500
